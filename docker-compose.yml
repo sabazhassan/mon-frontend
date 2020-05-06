@@ -1,5 +1,16 @@
 version: "3"
 services:
+  writer:
+    container_name: testdata-writer
+    build:
+      context: testdata-writer
+    environment:
+      - INFLUXDB_HOST=influxdb
+      - INFLUXDB_PORT=8086
+      - WRITE_INTERVAL=1.0
+    volumes:
+      - ./testdata-writer:/app
+
   dash:
     container_name: dash-app
     build:
