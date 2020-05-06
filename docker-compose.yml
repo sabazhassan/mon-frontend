@@ -1,0 +1,33 @@
+version: "3"
+services:
+  dash:
+    container_name: dash-app
+    build:
+      context: dash-app
+    volumes:
+      - ./dash-app:/app
+    ports:
+      - 8050:8050
+
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - 8086:8086
+    # uncomment for persistent storage
+    #volumes:
+    #  - influxdb:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:6.7.3
+    container_name: grafana
+    user: "0"
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  # uncomment for persistent storage
+  grafana-data:
+# influxdb:
