@@ -1,5 +1,7 @@
 # mon-frontend
 
+[![Build Status](https://travis-ci.org/HDventilator/mon-frontend.svg?branch=master)](https://travis-ci.org/HDventilator/mon-frontend)
+
 ## Developing
 
 start containers:
