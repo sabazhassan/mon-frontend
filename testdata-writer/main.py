@@ -25,7 +25,7 @@ def writeloop(client):
     """
     Infinite loop to write data to influxdb
     """
-    last_value = [0.0 for m in MEASUREMENTS]
+    last_value = [1.0 for m in MEASUREMENTS]
     while True:
         time.sleep(float(WRITE_INTERVAL))
         data = []
