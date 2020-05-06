@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# editorconfig
+.vscode/
+
 # virtual environments
 venv/
 
