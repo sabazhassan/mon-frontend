@@ -10,11 +10,12 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBServerError
 
 INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "influxdb")
 INFLUXDB_PORT = os.environ.get("INFLUXDB_PORT", 8086)
 
-WRITE_INTERVAL = os.environ.get("WRITE_INTERVAL", 1.0)
+WRITE_INTERVAL = os.environ.get("WRITE_INTERVAL", 20)
 DATABASE_NAME = os.environ.get("DATABASE_NAME", "testdata")
 
 # test fields and range for random value generation
@@ -27,7 +28,7 @@ def writeloop(client):
     """
     last_value = [1.0 for m in MEASUREMENTS]
     while True:
-        time.sleep(float(WRITE_INTERVAL))
+        time.sleep(float(WRITE_INTERVAL) / 1000)
         data = []
 
         # timestamp is in milliseconds
@@ -42,13 +43,16 @@ def writeloop(client):
                 f"{measurement_name},type=test value={value:.3f} {timestamp:.0f}"
             )
 
-        client.write_points(
-            data,
-            database=DATABASE_NAME,
-            time_precision="ms",
-            batch_size=10,
-            protocol="line",
-        )
+        try:
+            client.write_points(
+                data,
+                database=DATABASE_NAME,
+                time_precision="ms",
+                batch_size=10,
+                protocol="line",
+            )
+        except InfluxDBServerError as e:
+            print(e)
 
 
 def connect_client(max_tries: int = 30) -> Optional[InfluxDBClient]:
