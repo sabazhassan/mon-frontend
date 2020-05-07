@@ -1,11 +1,9 @@
-"Value Unit"
 """
 Main dash app
 """
 # pylint: disable=unused-argument
 import logging
 import os
-from typing import Any, Iterable
 
 import dash
 import dash_core_components as dcc
@@ -130,18 +128,21 @@ def fetch_data(intervals):
     Output("status-boxes", "children"), [Input("in-memory-storage", "data"),],
 )
 def live_boxes(data):
+    """
+    Generates live boxes as children of div 'status-boxes'
+    """
     measurements = list(influx.get_measurements())
-    # FIXME: use data.keys?
+    # for now use all available measurements, instead data.keys?
 
     children = []
-    for m in measurements:
-        mean_ = sum(data[m]["y"]) / len(data[m]["y"])
-        max_ = max(data[m]["y"])
+    for msmt in measurements:
+        mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
+        max_ = max(data[msmt]["y"])
         children.append(
             html.Div(
                 [
-                    html.H6(f"{m.upper()}", className="top_bar_title"),
-                    html.H1(f"{data[m]['y'][-1]}", className="top_bar_title"),
+                    html.H6(f"{msmt.upper()}", className="top_bar_title"),
+                    html.H1(f"{data[msmt]['y'][-1]}", className="top_bar_title"),
                     html.H6(
                         f"mean: {mean_:.2f}  max: {max_:.2f}", className="top_bar_title"
                     ),
@@ -156,7 +157,9 @@ def live_boxes(data):
     Output("live-graphs", "figure"), [Input("in-memory-storage", "data"),],
 )
 def live_graphs(data):
-
+    """
+    Generates live figure with subplots for each measurement
+    """
     measurements = list(influx.get_measurements())
     nrows = len(measurements)
     fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.02,)
