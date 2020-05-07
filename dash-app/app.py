@@ -12,6 +12,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
+from plotly.subplots import make_subplots
 
 from influx import Influx
 
@@ -28,11 +29,13 @@ INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 
 influx = Influx(INFLUXDB_HOST, INFLUXDB_DATABASE, INFLUXDB_PORT)
 app = dash.Dash(__name__)
+
+server = app.server
+# production: gunicorn -b 0.0.0.0:8050 app:server
+
 app.layout = html.Div(
     [
-        dcc.Graph(id="live-graph-pressure", animate=True),
-        dcc.Graph(id="live-graph-flow", animate=True),
-        dcc.Graph(id="live-graph-volume", animate=True),
+        dcc.Graph(id="live-graphs", animate=True, style={"height": "100vh"}),
         dcc.Interval(id="graph-update", interval=UPDATE_INTERVAL * 1000),
         dcc.Store(id="in-memory-storage", storage_type="memory"),
     ],
@@ -59,91 +62,48 @@ def fetch_data(intervals):
 
 
 @app.callback(
-    Output("live-graph-pressure", "figure"), [Input("in-memory-storage", "data")],
+    Output("live-graphs", "figure"), [Input("in-memory-storage", "data"),],
 )
-def graph_pressure(data):
-    """
-    Returns scatter graph for measurement whenever stored data changes
-    """
-    measurement = "pressure"
-    plot_data = make_scatter_data(
-        measurement, data[measurement]["x"], data[measurement]["y"]
-    )
-    plot_layout = make_scatter_layout(
-        measurement, data[measurement]["x"], data[measurement]["y"]
-    )
-    return {"data": plot_data, "layout": plot_layout}
+def live_graphs(data):
 
+    measurements = list(influx.get_measurements())
+    nrows = len(measurements)
+    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.02,)
 
-@app.callback(
-    Output("live-graph-flow", "figure"), [Input("in-memory-storage", "data")],
-)
-def graph_flow(data):
-    """
-    Returns scatter graph for measurement whenever stored data changes
-    """
-    measurement = "flow"
-    plot_data = make_scatter_data(
-        measurement, data[measurement]["x"], data[measurement]["y"]
-    )
-    plot_layout = make_scatter_layout(
-        measurement, data[measurement]["x"], data[measurement]["y"]
-    )
-    return {"data": plot_data, "layout": plot_layout}
-
-
-@app.callback(
-    Output("live-graph-volume", "figure"), [Input("in-memory-storage", "data")],
-)
-def graph_volume(data):
-    """
-    Returns scatter graph for measurement whenever stored data changes
-    """
-    measurement = "volume"
-    plot_data = make_scatter_data(
-        measurement, data[measurement]["x"], data[measurement]["y"]
-    )
-    plot_layout = make_scatter_layout(
-        measurement, data[measurement]["x"], data[measurement]["y"]
-    )
-    return {"data": plot_data, "layout": plot_layout}
-
-
-def make_scatter_data(measurement_name, data_x, data_y):
-    """
-    Helper to generate consistent plots
-    """
-    return [
-        go.Scatter(
-            x=data_x, y=data_y, name=measurement_name, fill="tozeroy", mode="lines"
-        )
-    ]
-
-
-def make_scatter_layout(
-    measurement_name: str, data_x: Iterable[Any], data_y: Iterable[Any]
-):
-    """
-    Helper to generate consistent layouts for scatter plots with adaptive x and y
-    axis ranges
-    """
-    return dict(
-        title=measurement_name.upper(),
+    # overall layout
+    layout = dict(
         paper_bgcolor="#000",
         plot_bgcolor="#000",
         # colorway=["#fff"],
-        xaxis=dict(
-            title="relative time [s]",
-            range=[min(data_x), max(data_x)],
-            visible=True,
-            color="#fff",
-        ),
-        yaxis=dict(
-            color="#fff",
-            title=f"{measurement_name} [-unit-]",
-            range=[min(data_y), max(data_y)],
-        ),
+        xaxis3=dict(title="relative time [s]", color="#fff"),
+        showlegend=False,
     )
+
+    # add traces and setup axes for each measurement
+    for n, measurement in enumerate(measurements):
+        trace = go.Scatter(
+            x=data[measurement]["x"],
+            y=data[measurement]["y"],
+            name=measurement,
+            fill="tozeroy",
+            mode="lines",
+        )
+        fig.add_trace(trace, row=n + 1, col=1)
+
+        y_layout = dict(
+            title=f"{measurement.upper()} [-]",
+            color="#fff",
+            range=[min(data[measurement]["y"]), max(data[measurement]["y"])],
+            showgrid=False,
+        )
+        if n == 0:
+            layout["yaxis"] = y_layout
+        else:
+            layout[f"yaxis{n+1}"] = y_layout
+
+    # set layout and return figure
+    fig.update_layout(layout)
+    return fig
 
 
 if __name__ == "__main__":
