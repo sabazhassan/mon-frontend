@@ -46,6 +46,11 @@ def _convert_timestr(datapt):
 
     # add UTC timezone information
     datapt_mod["time"] = timestamp.astimezone(timezone.utc)
+
+    # replace y-data with relative time
+    now = datetime.now(timezone.utc)
+    datapt_mod["time"] = (datapt_mod["time"] - now).total_seconds()
+
     return datapt_mod
 
 

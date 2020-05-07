@@ -50,15 +50,10 @@ def fetch_data(intervals):
     for measurement in influx.get_measurements():
         data = list(influx.get_data(measurement, duration="30s"))
 
-        x_data = [d["time"] for d in data]
-        y_data = [d["value"] for d in data]
-
-        # replace y-data with relative time
-        # fixme, move this to influx-connector
-        now = datetime.now(timezone.utc)
-        x_data = [(ts - now).total_seconds() for ts in x_data]
-
-        measurements_data[measurement] = {"x": x_data, "y": y_data}
+        measurements_data[measurement] = {
+            "x": [d["time"] for d in data],
+            "y": [d["value"] for d in data],
+        }
     return measurements_data
 
 
