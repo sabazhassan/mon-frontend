@@ -10,17 +10,16 @@ import plotly
 import random
 import plotly.graph_objs as go
 from collections import deque
-import tkinter
 
+from plotly.subplots import make_subplots
 
+# Create test data
 X = deque(maxlen=1500)
 X.append(1)
 Y = deque(maxlen=1500)
 Y.append(1)
 
-root = tkinter.Tk()
-M_height=root.winfo_screenheight()
-
+# App layout
 app = dash.Dash(__name__)
 app.layout = html.Div(
     [   
@@ -52,21 +51,9 @@ app.layout = html.Div(
                             [
                                 html.Div(
                                     [
-                                        dcc.Graph(id='live-graph', animate=False),
+                                        dcc.Graph(id='live-graph', style={"height": "80vh"},animate=False),
                                     ],
-                                    className="live_plot",
-                                ),
-                                html.Div(
-                                    [
-                                        dcc.Graph(id='live-graph2', animate=False),
-                                    ],
-                                    className="live_plot",
-                                ),
-                                html.Div(
-                                    [
-                                        dcc.Graph(id='live-graph3', animate=False),
-                                    ],
-                                    className="live_plot",
+                                    className="live_plot",                            
                                 ),
                                 dcc.Interval(
                                     id='graph-update',
@@ -80,19 +67,19 @@ app.layout = html.Div(
                             [
                                 html.Div(
                                     [
-                                        html.H4("Value Unit", className="top_bar_title"),
+                                        html.H4("mbar", className="top_bar_title"),
                                     ],
                                     className="status_box",
                                 ),
                                 html.Div(
                                     [
-                                        html.H4("Value Unit", className="top_bar_title"),
+                                        html.H4("mL", className="top_bar_title"),
                                     ],
                                     className="status_box",
                                 ),
                                 html.Div(
                                     [
-                                        html.H4("Value Unit", className="top_bar_title"),
+                                        html.H4("mL", className="top_bar_title"),
                                     ],
                                     className="status_box",
                                 ),
@@ -127,9 +114,7 @@ app.layout = html.Div(
     className="app_container",
 )
 
-@app.callback([Output('live-graph', 'figure'), 
-               Output('live-graph2', 'figure'), 
-               Output('live-graph3', 'figure')],
+@app.callback([Output('live-graph', 'figure')],               
               [Input('graph-update', 'n_intervals')])
 
 def update_graph_scatter(input_data):
@@ -148,33 +133,18 @@ def update_graph_scatter(input_data):
             mode= 'lines'
             )
 
+
     RESULT = {'data': [data],'layout' : go.Layout(paper_bgcolor= "#000", 
                                                 colorway= ["#fff"],
                                                 title='PRESSURE',
                                                 plot_bgcolor= "#000",
-                                                height = (M_height-240)/3,
                                                 xaxis=dict(title='ms',range=[min(X),max(X)], visible = True, color = "#fff"),
                                                 yaxis=dict(color = "#fff", range=[min(Y),max(Y)]),)}
                                                 
-    RESULT2 = {'data': [data],'layout' : go.Layout(paper_bgcolor= "#000", 
-                                                colorway= ["#0f0"],
-                                                title='FLOW',
-                                                plot_bgcolor= "#000",
-                                                height = (M_height-240)/3,
-                                                xaxis=dict(title='ms',range=[min(X),max(X)], visible = True, color = "#fff"),
-                                                yaxis=dict(color = "#fff", range=[min(Y),max(Y)]),)}
                                                 
-    RESULT3 = {'data': [data],'layout' : go.Layout(paper_bgcolor= "#000", 
-                                                colorway= ["#0ff"],
-                                                title='VOLUME',
-                                                plot_bgcolor= "#000",
-                                                height = (M_height-240)/3,
-                                                xaxis=dict(title='ms',range=[min(X),max(X)], visible = True, color = "#fff"),
-                                                yaxis=dict(color = "#fff", range=[min(Y),max(Y)]),)}
-                                                
-    return [RESULT, RESULT2, RESULT3]
+    return [RESULT]
                                                            
 
 
 if __name__ == '__main__':
-    app.run_server(host='127.0.0.1', port=8050 ,debug=True)
+    app.run_server(host='0.0.0.0', port=8050 ,debug=True)

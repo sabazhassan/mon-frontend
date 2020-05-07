@@ -14,23 +14,25 @@ body {
 	height: 100%;
 	display:flex;
 	flex-direction:column;
-	border-style: solid;
+	border-style: none;
 	border-color: #fff;
 }
 
 .top_bar {
     color: #fff;
-		border-style: solid;
+	height: 10vh;
+	border-style: none;
 	border-color: #fff;
 }
 
 .main_display {
     color: #fff;
-	height: 100%;
+	height: 80vh;
 	display: inline;
 }
 
 .live-plots {
+	color: #fff;
   height:100%;
   width:100%;
 }
@@ -43,20 +45,20 @@ body {
 
 .status_boxes{
   height:100%;
-  width:100%;
   display:flex;
   flex-direction:column;
 }
 
 .status_box{
-  width:100%;
   height:100%;
   	border-style: solid;
 	border-color: #fff;
 }
 
 .bottom_bar {
-	border-style: solid;
+	height: 10vh;
+	color; #fff;
+	border-style: none;
 	border-color: #fff;
 }
 
@@ -68,6 +70,6 @@ body {
 .machine_status{
 	width:100%;
 	height:100%;
-	border-style: solid;
+	border-style: none;
 	border-color: #fff;
 }
