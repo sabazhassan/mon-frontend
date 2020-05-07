@@ -5,13 +5,14 @@ Main dash app
 # pylint: disable=unused-argument
 import logging
 import os
+from typing import Any, Iterable
+
 import dash
-from datetime import datetime, timezone, timedelta
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
-from dash.dependencies import Input, Output, State
-from typing import Iterable, Any
+from dash.dependencies import Input, Output
+
 from influx import Influx
 
 logging.basicConfig(level=logging.INFO)
@@ -60,7 +61,7 @@ def fetch_data(intervals):
 @app.callback(
     Output("live-graph-pressure", "figure"), [Input("in-memory-storage", "data")],
 )
-def scatter_graph(data):
+def graph_pressure(data):
     """
     Returns scatter graph for measurement whenever stored data changes
     """
@@ -77,7 +78,7 @@ def scatter_graph(data):
 @app.callback(
     Output("live-graph-flow", "figure"), [Input("in-memory-storage", "data")],
 )
-def scatter_graph(data):
+def graph_flow(data):
     """
     Returns scatter graph for measurement whenever stored data changes
     """
@@ -94,7 +95,7 @@ def scatter_graph(data):
 @app.callback(
     Output("live-graph-volume", "figure"), [Input("in-memory-storage", "data")],
 )
-def scatter_graph(data):
+def graph_volume(data):
     """
     Returns scatter graph for measurement whenever stored data changes
     """
